@@ -32,7 +32,7 @@ def is_vert_aligned_left(e1, e2):
 
 
 def get_page_vert_percentile(mention, page_height):
-    """ Returns a value 0 - 1 from bottom (i.e top of the page)"""
+    """ Returns a value 0 - 1 from bottom (i.e bottom of the page)"""
     return 1.0 * mention.top / page_height
 
 
@@ -41,17 +41,17 @@ def get_page_horz_percentile(mention, page_width):
     return 1.0 * mention.left / page_width
 
 
-def get_aligned_tokens(mention, page):
-    """ Returns dict of aligned tokens """
+def get_aligned_sentences(mention, page):
+    """ Returns dict of aligned sentences"""
     res = {'top': [], 'bottom': [], 'left': [], 'right': []}
     for sent in page.get_sentences():
-        if is_horz_aligned(sent, mention):
-            if sent.right > mention.right:
+        if is_horz_aligned(sent, mention.sentence):
+            if sent.right > mention.sentence.right:
                 res['right'].extend(sent)
             else:
                 res['left'].extend(sent)
-        elif is_vert_aligned(sent, mention):
-            if sent.bottom > mention.bottom:
+        elif is_vert_aligned(sent, mention.sentence):
+            if sent.bottom > mention.sentence.bottom:
                 res['bottom'].extend(sent)
             else:
                 res['top'].extend(sent)
