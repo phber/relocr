@@ -9,26 +9,21 @@ def get_capitalized_parts(sentences):
     all_parts = []
     for sent in sentences:
         part = ''
-        for tok in sent.split():
-            if tok.isupper():
+        for i, tok in enumerate(sent.split()):
+            if not tok.istitle() or tok.isupper() or not tok[-1].isalpha() or i == 0:
                 if part:
-                    all_parts.append(part)
-                    part = ''
-                continue
-            elif tok[0].islower():
-                if part:
-                    all_parts.append(part)
+                    all_parts.append(part.strip())
                     part = ''
                 continue
             else:
                 part += tok
                 part += ' '
         if part:
-            all_parts.append(part)
+            all_parts.append(part.strip())
     return all_parts
 
 
-def top_ngrams(sentences, ngram_range=(1, 5), min_freq=3):
+def top_ngrams(sentences, ngram_range=(1, 5), min_freq=4):
     """ Return list of n-grams with a frequency > min_freq """
     vec = CountVectorizer(ngram_range=ngram_range)
     ngrams = vec.fit_transform(sentences)

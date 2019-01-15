@@ -1,3 +1,16 @@
+from itertools import groupby
+
+
+def splitWithIndices(s, c=' '):
+    # Split string and store indices
+    p = 0
+    for k, g in groupby(s, lambda x: x == c):
+        q = p + sum(1 for i in g)
+        if not k:
+            yield p, q 
+        p = q
+
+
 def is_horz_aligned(e1, e2):
     """ Returns true if the vertical center point of either span is within the vertical range of the other """
     e1_top = e1.top + 1.5
@@ -31,6 +44,16 @@ def is_vert_aligned_left(e1, e2):
     return abs(e1.left - e2.left) <= 2
 
 
+def is_below(e1, e2):
+    """ Returns true if e2 is below e1 """
+    return True if e1.top > e2.top else False
+
+
+def is_right_of(e1, e2):
+    """ Returns true if e2 is right of e1 """
+    return True if e2.right > e1.right else False
+
+
 def get_page_vert_percentile(mention, page_height):
     """ Returns a value 0 - 1 from bottom (i.e bottom of the page)"""
     return 1.0 * mention.top / page_height
@@ -41,18 +64,23 @@ def get_page_horz_percentile(mention, page_width):
     return 1.0 * mention.left / page_width
 
 
-def get_aligned_sentences(mention, page):
+def get_aligned_tokens(sentence, page, max_len=5):
     """ Returns dict of aligned sentences"""
-    res = {'top': [], 'bottom': [], 'left': [], 'right': []}
-    for sent in page.get_sentences():
-        if is_horz_aligned(sent, mention.sentence):
-            if sent.right > mention.sentence.right:
-                res['right'].extend(sent)
+    res = {'above': [], 'below': [], 'left': [], 'right': []}
+    box0 = sentence.textbox
+    for box in page.boxes:
+        if box0 == box:
+            continue
+        if len(box.text.split()) > max_len:
+            continue
+        if is_horz_aligned(box, box0):
+            if box.right > box0.right:
+                res['right'].append(box.sentences[0])
             else:
-                res['left'].extend(sent)
-        elif is_vert_aligned(sent, mention.sentence):
-            if sent.bottom > mention.sentence.bottom:
-                res['bottom'].extend(sent)
+                res['left'].append(box.sentences[0])
+        elif is_vert_aligned(box, box0):
+            if box.bottom > box0.bottom:
+                res['above'].append(box.sentences[0])
             else:
-                res['top'].extend(sent)
+                res['below'].append(box.sentences[0])
     return res
